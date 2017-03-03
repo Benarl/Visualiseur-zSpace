@@ -8,15 +8,11 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 using System.Collections;
-using System.IO;
 #if thread
 using System.Threading;
 #endif
 
-//using System.Windows.Controls;
-//using System.Windows;
 
 using System.ComponentModel;
 
@@ -27,8 +23,6 @@ public class MRMesh
     {
         public Vector3[] vertices;
         public List<Vector3[]> current_vertices;
-        //public List<Vector3[]> current_normalsbis;
-        //public List<Vector3[]> current_normals;
         public int level;
         public int depth;
         public int number_triangles;
@@ -50,6 +44,17 @@ public class MRMesh
     }
 
     public meshStruct mesh_struct;
+
+    public void delete()
+    {
+        mesh_struct.triangles = null;
+        mesh_struct.vertices = null;
+        mesh_struct.current_vertices = null;
+        mesh_struct.current_triangles = null;
+        mesh_struct.multi_res = null;
+        mesh_struct.face_res = null;
+        mesh_struct.sort_vertices = null;
+    }
 
     public List<Vector3> Normalization()
     {
@@ -82,8 +87,6 @@ public class MRMesh
         
         mesh_struct.sort_vertices = new List<int>();
         mesh_struct.current_vertices = new List<Vector3[]>();
-       /* mesh_struct.current_normals = new List<Vector3[]>();
-        mesh_struct.current_normalsbis = new List<Vector3[]>();*/
         List<Vector3> n = new List<Vector3>();
         n = Normalization();
 
@@ -112,8 +115,6 @@ public class MRMesh
             }
             mesh_struct.sort_vertices.Sort();
             mesh_struct.current_vertices.Add(new Vector3[mesh_struct.sort_vertices.Count]);
-            /*mesh_struct.current_normals.Add(new Vector3[mesh_struct.sort_vertices.Count]);
-            mesh_struct.current_normalsbis.Add(new Vector3[mesh_struct.current_triangles[nb].Length/3]);*/
 
             for (int i = 0; i < mesh_struct.sort_vertices.Count; i++)
             {
@@ -124,33 +125,9 @@ public class MRMesh
             {
                 mesh_struct.current_triangles[nb][i] = mesh_struct.sort_vertices.IndexOf(mesh_struct.current_triangles[nb][i]);
             }
-
-           /* for (int i = 0; i < mesh_struct.current_triangles[nb].Length / 3; i++)
-            {
-                mesh_struct.current_normalsbis[nb][i] = Vector3.Cross(10000 * (mesh_struct.current_vertices[nb][(mesh_struct.current_triangles[nb][3 * i + 1])]
-                    - mesh_struct.current_vertices[nb][(mesh_struct.current_triangles[nb][3 * i])]),
-                    10000*(mesh_struct.current_vertices[nb][(mesh_struct.current_triangles[nb][3 * i + 2])]
-                    - mesh_struct.current_vertices[nb][(mesh_struct.current_triangles[nb][3 * i])]));
-                mesh_struct.current_normalsbis[nb][i].Normalize();
-            }
             
-            for (int i = 0; i < mesh_struct.current_vertices[nb].Length; i++)
-            {
-                mesh_struct.current_normals[nb][i] = Vector3.zero;
-                for (int j = 0; j < mesh_struct.current_triangles[nb].Length; j++)
-                {
-                    if (mesh_struct.current_triangles[nb][j] == i)
-                    {
-                        mesh_struct.current_normals[nb][i] += mesh_struct.current_normalsbis[nb][j/3];
-                    }
-                }
-                mesh_struct.current_normals[nb][i].Normalize();
-            }*/
             mesh_struct.sort_vertices.Clear();
         }
-
-
-
         return true;
     }
 
@@ -464,7 +441,6 @@ public class Load_dat_bis : MonoBehaviour
     public MeshFilter[] filter;
     public Renderer rend;
     public MeshCollider col;
-    bool start = false;
     int first = 0;
     List<GameObject> obj = new List<GameObject>();
     public Shader shader1;
@@ -478,6 +454,7 @@ public class Load_dat_bis : MonoBehaviour
     {
         if (GetComponent<NewBehaviourScript1>().start)
         {
+            MeshStr.delete();
             foreach (GameObject GO in obj)
                 Destroy(GO);
             MeshStr.mesh_struct.fileName = GetComponent<NewBehaviourScript1>().output;
@@ -512,7 +489,6 @@ public class Load_dat_bis : MonoBehaviour
                 filter[i].mesh.triangles = MeshStr.mesh_struct.current_triangles[i];
                 filter[i].mesh.RecalculateNormals();
 
-                //filter[i].mesh.normals = MeshStr.mesh_struct.current_normals[i];
                 filter[i].mesh.RecalculateBounds();
                 filter[i].mesh.MarkDynamic();
                 filter[i].mesh.Optimize();
@@ -522,17 +498,12 @@ public class Load_dat_bis : MonoBehaviour
                 rend = filter[i].GetComponent<Renderer>();
                 rend.receiveShadows = false;
                 Material material = new Material(Shader.Find("Standard"));
-                //material.color = Color.blue;
                 rend.material = material;
+                //material.color = Color.blue;
                 col.sharedMesh = filter[i].mesh;
-                shader2 = Shader.Find("Standard");
-                shader1 = Shader.Find("Standard");
-                rend.material.shader = shader2;
-
 
             }
             col = GetComponent<MeshCollider>();
-            start = true;
         }
         first++;
     }
@@ -544,25 +515,11 @@ public class Load_dat_bis : MonoBehaviour
             Start();
 
         }
-        if (Input.GetButtonDown("Jump"))
-        {
-            var tab = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "SRmesh");
-            foreach (var t in tab)
-            {
-                rend = t.GetComponent<Renderer>();
-                if (rend.material.shader == shader1)
-                    rend.material.shader = shader2;
-                else
-                    rend.material.shader = shader1;
-            }
-
-        }
-
 
         if (Input.GetMouseButton(0) == true)
         {
             var tab = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "SRmesh");
-            float rotSpeed = 20f;
+            float rotSpeed = 5f;
             Vector3 sum = Vector3.zero;
             int n = 0;
             foreach (var t in tab)
@@ -619,7 +576,6 @@ public class Load_dat_bis : MonoBehaviour
                 filter[i].mesh.triangles = MeshStr.mesh_struct.current_triangles[i];
                 filter[i].mesh.RecalculateNormals();
 
-                //filter[i].mesh.normals = MeshStr.mesh_struct.current_normals[i];
                 filter[i].mesh.RecalculateBounds();
                 filter[i].mesh.MarkDynamic();
                 filter[i].mesh.Optimize();
@@ -639,7 +595,6 @@ public class Load_dat_bis : MonoBehaviour
                 filter[i].mesh.triangles = MeshStr.mesh_struct.current_triangles[i];
                 filter[i].mesh.RecalculateNormals();
 
-                //filter[i].mesh.normals = MeshStr.mesh_struct.current_normals[i];
                 filter[i].mesh.RecalculateBounds();
                 filter[i].mesh.MarkDynamic();
                 filter[i].mesh.Optimize();
@@ -650,7 +605,7 @@ public class Load_dat_bis : MonoBehaviour
     void OnGUI()
     {
 
-            GUI.Box(new UnityEngine.Rect(10, 10, 200, 300), "Menu");
+            GUI.Box(new UnityEngine.Rect(10, 10, 200, 320), "Menu");
 
             // Make the first button. If it is pressed, Application.Loadlevel (1) will be executed
             if (GUI.Button(new UnityEngine.Rect(20, 40, 110, 20), "Wireframe ON"))
@@ -680,7 +635,6 @@ public class Load_dat_bis : MonoBehaviour
                         filter[i].mesh.triangles = MeshStr.mesh_struct.current_triangles[i];
                         filter[i].mesh.RecalculateNormals();
 
-                        //filter[i].mesh.normals = MeshStr.mesh_struct.current_normals[i];
                         filter[i].mesh.RecalculateBounds();
                         filter[i].mesh.MarkDynamic();
                         filter[i].mesh.Optimize();
@@ -704,7 +658,6 @@ public class Load_dat_bis : MonoBehaviour
                         filter[i].mesh.triangles = MeshStr.mesh_struct.current_triangles[i];
                         filter[i].mesh.RecalculateNormals();
 
-                        //filter[i].mesh.normals = MeshStr.mesh_struct.current_normals[i];
                         filter[i].mesh.RecalculateBounds();
                         filter[i].mesh.MarkDynamic();
                         filter[i].mesh.Optimize();
@@ -718,10 +671,20 @@ public class Load_dat_bis : MonoBehaviour
             first = 1;
         }
 
-        if (GUI.Button(new UnityEngine.Rect(20, 190, 110, 20), "Inverser normal"))
+        if (GUI.Button(new UnityEngine.Rect(20, 190, 110, 20), "Reset"))
+        {
+            MeshStr.mesh_struct.level = 0;
+            foreach (GameObject GO in obj)
+                Destroy(GO);
+            
+            Start();
+        }
+
+        if (GUI.Button(new UnityEngine.Rect(20, 220, 110, 20), "Inverser normal"))
             {
                 Debug.Log("sens : " + MeshStr.mesh_struct.sens);
                 MeshStr.mesh_struct.inverse();
+            MeshStr.mesh_struct.level = 0;
                 foreach (GameObject GO in obj)
                     Destroy(GO);
                 Debug.Log("sens : " + MeshStr.mesh_struct.sens);
@@ -729,12 +692,10 @@ public class Load_dat_bis : MonoBehaviour
             }
         if (GetComponent<NewBehaviourScript1>().start)
         {
-            GUI.TextField(new UnityEngine.Rect(20, 220, 100, 20), "Profondeur : " + MeshStr.mesh_struct.level + "/" + (MeshStr.mesh_struct.depth - 1));
-            GUI.TextField(new UnityEngine.Rect(20, 250, 180, 20), "Nombre de Vertex : " + MeshStr.mesh_struct.multi_res[level]);
-            GUI.TextField(new UnityEngine.Rect(20, 280, 180, 20), "Nombre de Face : " + faceNumber);
+            GUI.TextField(new UnityEngine.Rect(20, 250, 100, 20), "Profondeur : " + MeshStr.mesh_struct.level + "/" + (MeshStr.mesh_struct.depth - 1));
+            GUI.TextField(new UnityEngine.Rect(20, 280, 180, 20), "Nombre de Vertex : " + MeshStr.mesh_struct.multi_res[level]);
+            GUI.TextField(new UnityEngine.Rect(20, 310, 180, 20), "Nombre de Face : " + faceNumber);
         }
-
-
         
     }
     
