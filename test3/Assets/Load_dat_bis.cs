@@ -19,7 +19,7 @@ using System.ComponentModel;
 
 public class MRMesh
 {
-    public struct meshStruct
+    public struct meshStruct//structure permettant de stocker toutes les informations sur le fichier dat et qui est chargé une seul fois
     {
         public Vector3[] vertices;
         public List<Vector3[]> current_vertices;
@@ -55,10 +55,14 @@ public class MRMesh
         mesh_struct.face_res = null;
         mesh_struct.sort_vertices = null;
     }
-
+    
+    /*
+    Normalization : informations sur le nuage de vertex en renvoyant un premier vecteur contenant
+    les dimensions de la bounding box (largeur, longueur, hauteur), un second contenant les coordonnées
+    du centre du nuage et un troisième contenant le facteur d'échelle à appliquer à l'objet 
+    */
     public List<Vector3> Normalization()
     {
-        
         Vector3 CoordMax = new Vector3();
         Vector3 CoordMin = new Vector3();
         Vector3 mean = new Vector3();
@@ -80,6 +84,11 @@ public class MRMesh
         return Transformation;
     }
 
+    /*
+    changeConnectivity : Mise à jour du niveau de résolution. En argument l'entier du nombre de niveaux de résolution à incrémenter 
+    tel que : level = level + c. Recharge current_vertices et current_triangle pour réactualiser l'affichage du maillage et charger les bons
+    niveaux de résolutions
+    */
     public bool changeConnectivity(int c)
     {
         if (this.mesh_struct.level + c < 0 || this.mesh_struct.level + c > this.mesh_struct.depth - 1)
@@ -131,6 +140,11 @@ public class MRMesh
         return true;
     }
 
+    /*
+    createMeshStruct : Première lecture du fichier dat pour fixer la longueur de tous les tableaux
+    de la structure meshStruct et aussi pour définir le nombre de niveaux de résolution, le nombre de triangles
+    primaire, le nombre de vertex et de triangles par niveaux de résolution. 
+    */
     public void createMeshStruct(string filename)
     {
 
@@ -320,6 +334,10 @@ public class MRMesh
         mesh_struct.level = 0;
     }
 
+    /*
+    populateMeshStruct : Seconde lecture pour charger les données dans les tableaux vertices et triangles
+
+    */
     public void populateMeshStruct()
     {
         StreamReader stream = File.OpenText(mesh_struct.fileName);
