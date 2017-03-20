@@ -34,6 +34,8 @@ public class MRMesh
         public int[,] face_res;
         public List<int> sort_vertices;
         public bool sens;
+        
+        //Inverse le sens des normals
         public void inverse()
         {
             if (sens)
@@ -455,18 +457,27 @@ public class MRMesh
 public class Load_dat_bis : MonoBehaviour
 {
     public MRMesh MeshStr = new MRMesh();
-
     public MeshFilter[] filter;
     public Renderer rend;
+    //Ajoute une composante collision aux objets pour pouvoir les saisir avec le stylet
     public MeshCollider col;
+    //Vaut 1 lorsqu'on veut recharger un fichier via l'explorateur
     int first = 0;
+    //Pour chaque élément de la liste est associé un triangle primaire de la maille
     List<GameObject> obj = new List<GameObject>();
     public Shader shader1;
     public Shader shader2;
 
+    //Recalcule du nombre de face à chaque changement de niveau de résolution
     int faceNumber = 0;
+    //Niveau de résolution courant
     int level = 0;
     
+    /*
+    Start : -Charge le fichier selectionné dans l'explorateur de fichier au démarrage de la classe MRMesh.
+            -Affiche le premier niveau de résolution pour tous les triangles primaires.
+            -Recentre et remet à l'echelle le nuage de point pour s'adapter à la camera.
+    */
 
     void Start()
     {
@@ -479,16 +490,20 @@ public class Load_dat_bis : MonoBehaviour
 
             obj = new List<GameObject>();
             UnityEngine.Debug.Log("start");
+            
+            //Lecture et stockages des informations sur le fichier .dat
             MeshStr.createMeshStruct(MeshStr.mesh_struct.fileName);
-
             MeshStr.populateMeshStruct();
             MeshStr.changeConnectivity(0);
+            
             filter = new MeshFilter[MeshStr.mesh_struct.primal_triangles];
             UnityEngine.Debug.Log(MeshStr.mesh_struct.primal_triangles);
             filter[0] = gameObject.AddComponent<MeshFilter>();
             faceNumber = 0;
             for (int i = 0; i < MeshStr.mesh_struct.primal_triangles; i++)
                 faceNumber += MeshStr.mesh_struct.face_res[i, level];
+                
+            //Initialisation des composantes des objets de la liste "obj" et ajustement 
             for (int i = 0; i < filter.Length; i++)
             {
 
@@ -526,18 +541,27 @@ public class Load_dat_bis : MonoBehaviour
         first++;
     }
 
+
+    /*
+    Update : Gestion des évènement à la souris et au clavier tel que :
+        -Rotation
+        -Translation
+        -Changer de niveau de résolution
+    */
     void Update()
     {
+        //lorsque first vaut 1 on relance l'explorateur de fichier.
         if (first == 1 && GetComponent<NewBehaviourScript1>().start)
         {
             Start();
-
         }
-
+        //Evenement à la souris
+        //Rotation
         if (Input.GetMouseButton(0) == true)
         {
             var tab = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "SRmesh");
             float rotSpeed = 5f;
+            //sum semble inutile
             Vector3 sum = Vector3.zero;
             int n = 0;
             foreach (var t in tab)
@@ -555,6 +579,7 @@ public class Load_dat_bis : MonoBehaviour
 
             }
         }
+        //Translation
         if (Input.GetMouseButton(1) == true)
         {
 
@@ -580,6 +605,7 @@ public class Load_dat_bis : MonoBehaviour
             }
 
         }
+        //La touche P pour augmenter le niveau de résolution
         if (Input.GetKeyDown(KeyCode.P) && MeshStr.changeConnectivity(1))
         {
             level++;
@@ -599,6 +625,7 @@ public class Load_dat_bis : MonoBehaviour
                 filter[i].mesh.Optimize();
             }
         }
+        //La touche M pour diminuer le niveau de résolution
         if (Input.GetKeyDown(KeyCode.M) && MeshStr.changeConnectivity(-1))
         {
             level--;
@@ -620,9 +647,16 @@ public class Load_dat_bis : MonoBehaviour
         }
     }
     
+    /*OnGUI : Gère les évènement de l'interface graphique tel que les boutons suivants :
+          -Wireframe On/Off
+          -Niveau +/- 1
+          -Charger fichier
+          -Inverser Normal
+          -Reset
+      Affichage des informations sur la profondeur, le nombre de vertex et de triangles.
+    */
     void OnGUI()
     {
-
             GUI.Box(new UnityEngine.Rect(10, 10, 200, 320), "Menu");
 
             // Make the first button. If it is pressed, Application.Loadlevel (1) will be executed
