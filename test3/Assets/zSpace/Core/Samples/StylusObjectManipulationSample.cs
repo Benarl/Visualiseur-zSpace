@@ -123,6 +123,9 @@ namespace zSpace.Core.Samples
         // Private Helpers
         //////////////////////////////////////////////////////////////////  
         
+        /*
+        BeginGrabCut : Colorie un ensemble d'objet et les place dans la liste _grabObjectList
+        */
         private void BeginGrabCut(GameObject hitObject)
         {
             int a = 0;
@@ -147,7 +150,9 @@ namespace zSpace.Core.Samples
             }
 
         }
-
+        /*
+        BeginGrabMultiple : saisir une liste d'objets
+        */
         private void BeginGrabMultiple(string id, float hitDistance, Vector3 inputPosition, Quaternion inputRotation, bool b)
         {
             List<GameObject> hitObject = new List<GameObject>();
@@ -186,7 +191,9 @@ namespace zSpace.Core.Samples
             _initialGrabDistanceList = hitDistance;
 
         }
-
+        /*
+        UpdateGrabMultiple : déplacer un ensemble d'objets avec le stylet
+        */
         private void UpdateGrabMultiple(Vector3 inputPosition, Quaternion inputRotation)
         {
             Vector3 inputEndPosition = inputPosition + (inputRotation * (Vector3.forward * _initialGrabDistanceList));
