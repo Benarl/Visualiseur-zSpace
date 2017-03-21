@@ -21,17 +21,18 @@ public class MRMesh
 {
     public struct meshStruct//structure permettant de stocker toutes les informations sur le fichier dat et qui est chargé une seul fois
     {
-        public Vector3[] vertices;
-        public List<Vector3[]> current_vertices;
+        public Vector3[] vertices;//Tableau des coordonnées de tous les vecteurs dans l'ordre des niveaux de résolution décroissant
+        public List<Vector3[]> current_vertices;//Tableau des coordonnées d'un seul niveau de résolution
         public int level;
-        public int depth;
-        public int number_triangles;
-        public int primal_triangles;
-        public int[][,] triangles;
-        public int[][] current_triangles;
+        public int depth;//Nombre total de niveau de résolution
+        public int number_triangles;//Nombre total de triangles
+        public int primal_triangles;//Nombre de triangle primaire et donc de maille à générer
+        public int[][,] triangles;//Tableau où le premier argument est le numéro de triangle primaire
+        //Le deuxième est le numéro d'un des 3 sommets, le troisième les niveaux de résolution dans l'ordre croissant 
+        public int[][] current_triangles;//Tableau identique à triangles mais restreint à un niveau de résolution
         public string fileName;
-        public int[] multi_res;
-        public int[,] face_res;
+        public int[] multi_res;//Nombre de vertex pour chaque niveau de résoltion
+        public int[,] face_res;//Nombre de triangles pour chaque triangles primaire et chaque niveau de résolution (pour indexage)
         public List<int> sort_vertices;
         public bool sens;
         
@@ -102,6 +103,7 @@ public class MRMesh
         n = Normalization();
 
         this.mesh_struct.level += c;
+        //Boucle sur tous les triangles primaires
         for (int nb = 0; nb < mesh_struct.primal_triangles; nb++)
         {
 
@@ -111,6 +113,7 @@ public class MRMesh
             for (int i = 0; i < this.mesh_struct.level; i++)
                 somme += this.mesh_struct.face_res[nb, i];
 
+            //Remplissage current_triangles pour l'affichage
             for (int j = 0; j < this.mesh_struct.face_res[nb, this.mesh_struct.level]; j++)
             {
                 this.mesh_struct.current_triangles[nb][3 * j] = this.mesh_struct.triangles[nb][0, somme + j];
@@ -173,11 +176,11 @@ public class MRMesh
              string currentText = reader.ReadLine();
              char[] splitIdentifier = { ' ' };
              string[] brokenString;
-             while (currentText != null)
+             while (currentText != null)//Boucle sur toutes les lignes du fichier .dat
              {
-                 currentText = currentText.Trim();                           //Trim the current line
-                 brokenString = currentText.Split(splitIdentifier, 50);
-                 if (brokenString[0] == "name:" )
+                 currentText = currentText.Trim(); //Trim the current line
+                 brokenString = currentText.Split(splitIdentifier, 50);//Sépare chaque ligne par les espaces
+                 if (brokenString[0] == "name:" )//Si la ligne commence par "name" on compte le nombre de triangle primaire
                 {
                     Int32.TryParse(brokenString[2], out test);
                     if(test == 1)
@@ -338,7 +341,6 @@ public class MRMesh
 
     /*
     populateMeshStruct : Seconde lecture pour charger les données dans les tableaux vertices et triangles
-
     */
     public void populateMeshStruct()
     {
