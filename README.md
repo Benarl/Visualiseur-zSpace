@@ -1,19 +1,5 @@
 # Visualiseur-zSpace
 
-## Problèmes rencontrés
--Faire un Reset/Inverser Normal/Charger après avoir changer de niveaux de résolutions
--Charger un fichier dat dont les vertex ne sont pas triés par ordre décroissant (les vertex des niveaux de résolutions faibles en premier ...)
-
-## Fonctionnalités
--Chercher un fichier dat via un explorateur de fichier.
--Charger un fichier Dat dans Unity
--Afficher un fichier Dat
--Changer de niveaux de résolution
--Manipulation à la souris (rotation, translation, scale)
--Manipulation au stylet
--Découpage de surface au stylet avec surbrillance des zones selectionnées
--Mode Wireframe
-
 ## Projet
 
 ### 1) Scripts
@@ -28,8 +14,25 @@ La premières est MRMesh qui contient une structure permettant de stocker toutes
 
 La deuxième classe est Load_dat_bis qui hérite de MonoBehaviour.
 Elle contient la fonction Start qui permet de charger une première fois un fichier dat.
-La fonction Update
+La fonction Update prend en charge l'interaction avec la souris, les boutons de l'interface graphique et l'explorateur de fichiers.
 
 ### 3) StylusObjectManipulationSample
+Ce fichier est d'abord le script fourni dans les ressources du zSpace disponible sur le site officiel, il y a en plus des fonctions permettant de saisir plusieurs objets en même temps à travers les fonctions BeginMultiple et UpdateMultiple.
+La fonction BeginGrabCut permet en maintenant le bouton arrière gauche du stylet de sélectionner et de colorier en rouges le groupe d'objet à déplacer. Pour selectionner tous les objets en même temps il faut appuyer sur le bouton arrière droit.
 
 ### 4) NewBehaviourScript1 
+Cette classe contient l'explorateur de fichier
+
+## Fonctionnalités
+-Chercher un fichier dat via un explorateur de fichier.
+-Charger un fichier Dat dans Unity
+-Afficher un fichier Dat
+-Changer de niveaux de résolution
+-Manipulation à la souris (rotation, translation, scale)
+-Manipulation au stylet
+-Découpage de surface au stylet avec surbrillance des zones selectionnées
+-Mode Wireframe
+
+## Problèmes rencontrés
+-Faire un Reset/Inverser Normal/Charger après avoir changer de niveaux de résolutions entraîne un bug et n'affiche plus l'objet 3D.
+-Charger un fichier dat dont les vertex ne sont pas triés par ordre décroissant (les vertex des niveaux de résolutions faibles en premier ...)
